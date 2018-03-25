@@ -29,6 +29,7 @@ important things necessary for change as you like.
 - The user name must be following format.
   username_projectname
   If "_projectname" is none, total it with user name alone.
+- QtCreator is necessary to change GUI with .ui file.
 
 ### License
 
