@@ -1,6 +1,6 @@
 # deadlinecalc
 
-deadlinecalc is calculate usage fee from the rendering time on deadline with GUI.
+deadlinecalc is calculate fee from the rendering time on deadline with GUI.
 
 ![deadlinecalc](https://github.com/KengoSawa2/deadlinecalc/blob/master/SS/deadlinecalc.png "deadlinecalc")
 
@@ -15,24 +15,34 @@ deadlinecalc provides the following functions.
 All functions are implemented with "Deadline standalone Python API"
 That is, deadlinecalc is front end tool.
 
-deadlinecalc is in-house tool, it is a reference example program.
+deadlinecalc is in-house tool for L'espace Vision, it is a reference example program.
 It is necessary to change the code directly for IP address, port number,etc....
 
 Before you get started,You may study "Deadline standalone Python API"
 https://docs.thinkboxsoftware.com/products/deadline/10.0/1_User%20Manual/manual/standalone-python.html
 
+### Modification topic
+important things necessary for change as you like.
+
+- It is necessary to enter cinebench's score in slave information "Ex9" .
+- By assigning a user name to each project, you can calculate the cost for each case.
+- The user name must be following format.
+  username_projectname
+  If "_projectname" is none, total it with user name alone.
+
 ### License
 
 Source Code license is [BSD 2-Clause License]  
 
-### Checked Environment
+### Environment
 
-Software:
-Deadline 10.0.xxxx
+Windows10
+deadline 10.0.xxxx
 
 ### Requitred Library
 
-This product needs Pyside 1.2.x. for GUI.
+Pyside 1.2.x
+knownpaths.py https://gist.github.com/mkropat/7550097
 
 ## Notice
 This tool is in-house optimized implementation.
