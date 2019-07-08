@@ -40,7 +40,7 @@ class MainWindow(QtGui.QMainWindow,Ui_MainWindow):
     deadlinecalc メインウインドウ
     '''
 
-    __version__ = "1.1.2"
+    __version__ = "1.1.3"
 
     CORP_INFO = 'LespaceVision'
 

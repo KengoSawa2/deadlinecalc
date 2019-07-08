@@ -23,7 +23,7 @@ sysisWindows = platform.system() == 'Windows'
 
 class DeadLineCalc(QtCore.QThread,QObject):
 
-    __version__ = "1.1.2"
+    __version__ = "1.1.3"
     APPNAME = "DeadlineCalc"
 
     sig_appendtext = QtCore.Signal(str,bool)
@@ -203,7 +203,7 @@ class DeadLineCalc(QtCore.QThread,QObject):
             slavelist = self.con.Slaves.GetSlaveNames()
 
             for slavename in slavelist:
-                #print("slavename:" + slavename)
+                # print("slavename:" + slavename)
                 slaveinfo = self.con.Slaves.GetSlaveInfoSettings(slavename)
 
                 # Ex9に価格情報が入っていない場合はメッセージ出力してスキップ
@@ -225,10 +225,17 @@ class DeadLineCalc(QtCore.QThread,QObject):
                 slave_innerdict['Tasklmt'] = slaveinfo['Settings']['TskLmt']
                 slave_innerdict['Totalprice'] = 0
 
-                self.slavedict[slavename] = slave_innerdict
+                # のちのself.con.Tasks.GetJobTasks(jobid)で帰ってくるtaskのスレーブ名が何故か小文字になる場合あるので、
+                # 正しくないけどスレーブ情報は全部小文字で格納しておく
+                # 1.1.3
+                slavename_l = slavename.lower()
+                self.slavedict[slavename_l] = slave_innerdict
+                #print("slavename_l:" + slavename_l)
+                #pp.pprint(self.slavedict[slavename_l])
                 #pp.pprint(slaveinfo)
                 #print(slavename)
                 #pp.pprint(self.slavedict[slavename])
+            #pp.pprint(self.slavedict)
 
         except Exception as e:
             self.errmessage = "Error:getSlaveInformation\n" + str(e)
@@ -449,14 +456,18 @@ class DeadLineCalc(QtCore.QThread,QObject):
 
             for task in tasks['Tasks']:
 
-                #1秒間あたりの料金取得
-                if not self.slavedict.get(task['Slave']):
+                # 1秒間あたりの料金取得
+                # v1.1.3
+                # task内の'Slave'の名称が大文字小文字区別があったりなかったりしてめんどくさい。
+                # 強制的に小文字扱いにして一致させる
+                slave_l = task['Slave'].lower()
+                if not self.slavedict.get(slave_l):
                     # 当該スレーブが有効(Ex9が入ってないまたはdeadline上に登録されてないスレーブ)
                     #
-                    if task['Slave'] == u'':
+                    if slave_l == u'':
                         slavestr = 'None!!'
                     else:
-                        slavestr = task['Slave']
+                        slavestr = slave_l
                     errstr = "Warn: jobid = " + jobid + " taskid = " + task['_id'] + " slavename = " + slavestr + "\n"
                     errstr += "skipped this job calc. skip tasknum = " + str(len(tasks['Tasks'])) + "\n"
                     self.errmessage += errstr
@@ -504,28 +515,28 @@ class DeadLineCalc(QtCore.QThread,QObject):
                 # # ジョブ側の並列起動数が1より大きい？
                 # if (conctask > 1):
                 #     # スレーブの同時起動可能数がジョブの同時可能起動数よりおおきい？
-                #     if (self.slavedict[task['Slave']]['Tasklmt'] >= conctask):
+                #     if (self.slavedict[slave_l]['Tasklmt'] >= conctask):
                 #         # ジョブ並列起動の数はジョブ単位の起動数に制約するよ
                 #         div_proc = conctask
                 #     else:
                 #         # ジョブ単位起動数に制約されないので、スレーブの並列数に従うよ
-                #         div_proc = self.slavedict[task['Slave']]['Tasklmt']
+                #         div_proc = self.slavedict[slave_l]['Tasklmt']
                 # else:
                 #     # そもそも1
                 #     div_proc = 1
 
                 # v104まで
-                # render_price = ((self.slavedict[task['Slave']]['Price'] * render_sec) / div_proc) * framenum
+                # render_price = ((self.slavedict[slave_l]['Price'] * render_sec) / div_proc) * framenum
 
                 # v105から
-                render_price = (self.slavedict[task['Slave']]['Price'] * render_sec)
+                render_price = (self.slavedict[slave_l]['Price'] * render_sec)
 
                 # slave単位金額デバッグ
-                #print('Slave:' + task['Slave'] + ' price_sec:' + str(self.slavedict[task['Slave']]['Price']) + ' Frame:' + \
+                #print('Slave:' + slave_l + ' price_sec:' + str(self.slavedict[slave_l]['Price']) + ' Frame:' + \
                 #      str(framenum) + ' RenderTime:' + str(render_sec) + ' Price:' + str(render_price))
 
                 # slaveごとの合計金額に加算
-                self.slavedict[task['Slave']]['Totalprice'] += render_price
+                self.slavedict[slave_l]['Totalprice'] += render_price
 
                 # jobごとの合計金額に加算
                 # self.calcjobresultdict[jobid] += render_price
